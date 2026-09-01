@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Availability Board</title>
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#16213e">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="ops">
+  <div class="ops-id">
+    <h1>Availability Board</h1>
+    <p id="sourceState" class="ops-state" data-tone="idle">Loading</p>
+  </div>
+
+  <div class="ops-week">
+    <button type="button" id="prevWeek" class="stepper" aria-label="Previous week">&#8592;</button>
+    <div class="ops-week-label">
+      <strong id="weekLabel">&nbsp;</strong>
+      <button type="button" id="thisWeek" class="linky">Back to this week</button>
+    </div>
+    <button type="button" id="nextWeek" class="stepper" aria-label="Next week">&#8594;</button>
+  </div>
+
+  <div class="ops-actions">
+    <button type="button" id="railBtn" class="icon-btn" title="Show or hide the side panel" aria-label="Show or hide the side panel">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg>
+    </button>
+    <button type="button" id="themeBtn" class="icon-btn" title="Switch between dark and light" aria-label="Switch between dark and light">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path id="themeIcon" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+    <button type="button" id="reloadBtn" class="icon-btn" title="Reload the schedule" aria-label="Reload the schedule">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v5h.582m15.356 2A8 8 0 0 0 4.582 9m0 0H9m11 11v-5h-.581m0 0a8 8 0 0 1-15.357-2m15.357 2H15"/></svg>
+    </button>
+    <button type="button" id="settingsBtn" class="icon-btn" title="Settings" aria-label="Settings">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="shell">
+
+  <aside class="rail" aria-label="Roster and view controls">
+    <section class="rail-block">
+      <div class="rail-head">
+        <h2>Who are you scheduling?</h2>
+        <span id="pickCount" class="tally">0 picked</span>
+      </div>
+      <input type="search" id="rosterSearch" class="field" placeholder="Filter names" autocomplete="off">
+      <div id="roster" class="roster" role="group" aria-label="People">
+        <p class="empty">Load a schedule to see names.</p>
+      </div>
+      <div class="rail-row">
+        <button type="button" id="clearPicks" class="linky">Clear</button>
+        <button type="button" id="pickAll" class="linky">Select all shown</button>
+      </div>
+      <div class="rail-row stack">
+        <select id="groupPick" class="field" aria-label="Saved groups">
+          <option value="">Saved groups</option>
+        </select>
+        <div class="rail-row">
+          <button type="button" id="saveGroup" class="linky">Save this set</button>
+          <button type="button" id="deleteGroup" class="linky">Delete</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="rail-block">
+      <h2>View</h2>
+      <label class="switch">
+        <input type="checkbox" id="toggleWindows" checked>
+        <span>Show proposed windows</span>
+      </label>
+      <label class="switch">
+        <input type="checkbox" id="toggleOthers">
+        <span>Include events for everyone else</span>
+      </label>
+      <label class="switch">
+        <input type="checkbox" id="toggleAttendees" checked>
+        <span>Show attendee names on events</span>
+      </label>
+      <label class="switch">
+        <input type="checkbox" id="toggleNow" checked>
+        <span>Mark the current time</span>
+      </label>
+      <label class="lab" for="zoom">Row height</label>
+      <select id="zoom" class="field">
+        <option value="0.55">Compact</option>
+        <option value="0.82" selected>Normal</option>
+        <option value="1.15">Tall</option>
+      </select>
+      <button type="button" id="fitBtn" class="btn btn-quiet btn-wide">Fit the day to this week</button>
+    </section>
+
+    <section class="rail-block">
+      <h2>Share</h2>
+      <p class="hint">Plain text sized for a Slack or Signal message.</p>
+      <button type="button" id="shareBtn" class="btn btn-wide">Build the message</button>
+      <button type="button" id="linkBtn" class="btn btn-quiet btn-wide">Copy a link to this view</button>
+      <button type="button" id="printBtn" class="btn btn-quiet btn-wide">Print this week</button>
+      <p id="linkMsg" class="msg" role="status"></p>
+    </section>
+  </aside>
+
+  <section class="board" aria-label="Weekly schedule">
+    <div class="grid-scroll">
+      <div id="grid" class="grid">
+        <div class="gutter-head"></div>
+        <div class="day-heads" id="dayHeads"></div>
+        <div class="gutter" id="gutter"></div>
+        <div class="lanes" id="lanes"></div>
+      </div>
+    </div>
+    <div class="legend">
+      <span class="key key-flying">Flying</span>
+      <span class="key key-ground">Ground</span>
+      <span class="key key-na">Not available</span>
+      <span class="key key-sup">Supervision</span>
+      <span class="key key-open">Everyone free</span>
+      <span class="key key-partial">Most of the group free</span>
+      <span id="windowSummary" class="key-note"></span>
+    </div>
+  </section>
+
+</main>
+
+<!-- Settings -->
+<div class="scrim" id="settingsScrim" hidden>
+  <div class="sheetpane" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <header class="sheetpane-head">
+      <h2 id="settingsTitle">Settings</h2>
+      <button type="button" class="closer" data-close="settingsScrim" aria-label="Close settings">&times;</button>
+    </header>
+
+    <nav class="tabs" id="settingsTabs">
+      <button type="button" class="tab is-on" data-tab="tabSource">Schedule source</button>
+      <button type="button" class="tab" data-tab="tabNames">Names</button>
+      <button type="button" class="tab" data-tab="tabDay">Day and windows</button>
+      <button type="button" class="tab" data-tab="tabCols">Sections</button>
+    </nav>
+
+    <div class="sheetpane-body">
+
+      <section id="tabSource" class="tabpane is-on">
+        <label class="lab" for="endpoint">Schedule service address</label>
+        <input type="url" id="endpoint" class="field" placeholder="https://script.google.com/macros/s/.../exec">
+        <p class="hint">This is the TPS Schedule Apps Script that reads the Whiteboard. The board asks it for <code>mode=full</code>, which returns every day it has cached along with the roster. It refreshes itself every 15 minutes, so reloading more often than that will return the same data.</p>
+        <div class="rail-row">
+          <button type="button" id="loadBtn" class="btn">Load from this address</button>
+          <button type="button" id="resetEndpoint" class="btn btn-quiet">Use the default</button>
+        </div>
+
+        <hr class="rule">
+
+        <label class="lab" for="jsonPaste">Or paste a response directly</label>
+        <textarea id="jsonPaste" class="field area" rows="5" placeholder='{"metadata":{},"roster":{},"days":[]}'></textarea>
+        <button type="button" id="loadPasteBtn" class="btn">Load pasted JSON</button>
+        <p class="hint">Open the address above with <code>?mode=full</code> in a browser tab and paste what comes back. Useful when the network blocks the fetch but not the browser.</p>
+        <p id="sourceMsg" class="msg" role="status"></p>
+      </section>
+
+      <section id="tabNames" class="tabpane">
+        <p class="hint">Every spelling found on the Whiteboard is listed on the left. Type the name you want on the board and in shared messages. Leave a row blank to keep the original.</p>
+        <div id="nameEditor" class="name-editor">
+          <p class="empty">Load a schedule first.</p>
+        </div>
+        <div class="rail-row">
+          <button type="button" id="saveNames" class="btn">Save names</button>
+          <button type="button" id="resetNames" class="btn btn-quiet">Reset to sheet spellings</button>
+        </div>
+      </section>
+
+      <section id="tabDay" class="tabpane">
+        <div class="pair">
+          <div>
+            <label class="lab" for="dayStart">Day starts</label>
+            <input type="time" id="dayStart" class="field" value="07:00">
+          </div>
+          <div>
+            <label class="lab" for="dayEnd">Day ends</label>
+            <input type="time" id="dayEnd" class="field" value="17:00">
+          </div>
+        </div>
+        <label class="lab" for="minWindow">Shortest window worth proposing</label>
+        <select id="minWindow" class="field">
+          <option value="15">15 minutes</option>
+          <option value="30" selected>30 minutes</option>
+          <option value="45">45 minutes</option>
+          <option value="60">1 hour</option>
+          <option value="90">90 minutes</option>
+          <option value="120">2 hours</option>
+        </select>
+        <label class="lab" for="buffer">Padding around committed events</label>
+        <select id="buffer" class="field">
+          <option value="0" selected>None</option>
+          <option value="10">10 minutes</option>
+          <option value="15">15 minutes</option>
+          <option value="30">30 minutes</option>
+        </select>
+        <label class="switch">
+          <input type="checkbox" id="allowPartial">
+          <span>Also mark windows where most of the group is free</span>
+        </label>
+        <p class="hint">Partial windows are drawn in a lighter shade and labelled with who cannot make it.</p>
+
+        <hr class="rule">
+        <p class="lab">Keyboard</p>
+        <div class="keys">
+          <span><kbd>&#8592;</kbd><kbd>&#8594;</kbd> week</span>
+          <span><kbd>T</kbd> this week</span>
+          <span><kbd>B</kbd> side panel</span>
+          <span><kbd>W</kbd> windows</span>
+          <span><kbd>D</kbd> dark or light</span>
+          <span><kbd>R</kbd> reload</span>
+          <span><kbd>S</kbd> settings</span>
+          <span><kbd>/</kbd> find a name</span>
+        </div>
+      </section>
+
+      <section id="tabCols" class="tabpane">
+        <p class="hint">The Whiteboard splits each day into sections. Choose which of them take up someone's time.</p>
+        <label class="switch"><input type="checkbox" id="sec_flying" checked><span>Flying events, brief through debrief</span></label>
+        <label class="switch"><input type="checkbox" id="sec_ground" checked><span>Ground events</span></label>
+        <label class="switch"><input type="checkbox" id="sec_na" checked><span>Not available</span></label>
+        <label class="switch"><input type="checkbox" id="sec_supervision" checked><span>Supervision duties</span></label>
+        <label class="switch"><input type="checkbox" id="sec_academics"><span>Academics</span></label>
+        <hr class="rule">
+        <label class="switch"><input type="checkbox" id="skipCancelled" checked><span>Ignore events marked cancelled</span></label>
+        <p class="hint">Flying events count from brief start to debrief end rather than takeoff to landing, since the crew is committed for the whole block. Supervision entries with no times, such as authorisations, are left out.</p>
+      </section>
+
+    </div>
+
+    <footer class="sheetpane-foot">
+      <button type="button" class="btn" data-close="settingsScrim">Done</button>
+    </footer>
+  </div>
+</div>
+
+<!-- Share -->
+<div class="scrim" id="shareScrim" hidden>
+  <div class="sheetpane" role="dialog" aria-modal="true" aria-labelledby="shareTitle">
+    <header class="sheetpane-head">
+      <h2 id="shareTitle">Message text</h2>
+      <button type="button" class="closer" data-close="shareScrim" aria-label="Close">&times;</button>
+    </header>
+    <div class="sheetpane-body">
+      <div class="rail-row wrap">
+        <label class="switch inline"><input type="radio" name="shareMode" value="open" checked><span>Open times only</span></label>
+        <label class="switch inline"><input type="radio" name="shareMode" value="full"><span>Open times and conflicts</span></label>
+        <label class="switch inline"><input type="checkbox" id="shareFence" checked><span>Wrap in a code block</span></label>
+      </div>
+      <textarea id="shareText" class="field mono area tall" rows="18" spellcheck="false"></textarea>
+      <div class="rail-row">
+        <button type="button" id="copyShare" class="btn">Copy to clipboard</button>
+        <span id="copyMsg" class="msg" role="status"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="printOut" class="printout" aria-hidden="true"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
