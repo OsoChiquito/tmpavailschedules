@@ -265,6 +265,7 @@ h1,h2{margin:0;font-weight:600;letter-spacing:-.01em}
   background:rgba(20,39,61,.5);
   display:flex;align-items:center;justify-content:center;padding:20px;
 }
+.scrim[hidden]{display:none}
 .sheetpane{
   background:var(--card);border-radius:var(--radius);
   width:min(680px,100%);max-height:88vh;display:flex;flex-direction:column;
